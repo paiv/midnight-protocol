@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="paiv">
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAAZlBMVEUAAADCwsLExMTFxcXHx8e/v7/ExMTFxcXExMTDw8PExMTExMTExMTExMTExMTExMQAAACTk5MYGBh7e3sxMTEMDAxWVlY9PT24uLi3t7erq6uHh4dJSUmfn59ubm5iYmIlJSWsrKxDeFlIAAAAD3RSTlMAYIAQICDv38BAr6CfkHBfKaK1AAAAxUlEQVQoz22R2Q6EIAxFddxXLiDuOs7//+RQYiCI56WWE28ojRxZ2WZRSPJhmi5Qfc4MRewdVyWzFJULr+mAT+IaJH212R1uUnYYxEzNJ9EiZsQXmDau7Wja2AoBQWWAeggpOZUR8IRlgngT8wjIUAwA1MneBfb5LWqRClMo7nFWX3D+oyIB7on1Hvn0BHFBbfo/4ea4N3QoQAkAWrNcPyKRNhRmbjtQUJ26RRV0WX4supS0KEdMilL66EHa2Q0FqilT1/0BbHsXgaJ5NBUAAAAASUVORK5CYII=">
+    <title>Hacker Chess</title>
+
+<style media="screen">
+:root {color-scheme:dark; background:#292b2d; color:#ececec; font-family:system-ui, ui-monospace, monospace;}
+noscript {position:absolute; top:0; left:25%; background:magenta; color:white; padding:1em;}
+a {color:#9e9eff;}
+.mpr {font-size:smaller;}
+.wmgr {display:flex; flex-wrap:wrap;}
+.pane {position:relative; display:grid; background:#000; color:#fff; border:1px outset #fff; user-select:none; -webkit-user-select:none; cursor:default;}
+.pane > .ptitle {grid-column:1/-1; grid-row:1/2; font-size:x-small; padding:0.4em;}
+.ptitle .ral, .ptitle .ral:hover {position:absolute; right:0; top:0; margin-right:1em; height:2em; background:0; color:#fff; font:inherit;}
+.pane > .pview {display:grid; grid-column:1/-1; grid-row:2/-2; background:#828282;}
+.pane > .pinput {grid-column:1/-1; grid-row:-2/-1; font-size:x-small; padding:0.4em;}
+.pane > .pinput input {border:none; outline:none; background:inherit; font:inherit;}
+#gb {width:20em; min-width:20em; height:26em; grid-template:repeat(26, 1fr) / repeat(20, 1fr); margin:1em;}
+#gb .pview {grid-template:repeat(24, 1fr) / repeat(20, 1fr);}
+#gb .board {display:grid; gap:1px;
+    grid-column:7/span 12; grid-row:6/span 12;
+    grid-template-columns: 1fr repeat(5, 1fr); grid-template-rows: 1fr repeat(5, 1fr);}
+#gb .win {position:absolute; width:100%;}
+#cin {width:18rem;}
+#ng {width:10em; min-width:10em; height:9em; grid-template:repeat(9, 1fr) / repeat(10, 1fr); margin:1em;}
+.pane button {border:none; background:#828282; color:#000;}
+.pane button:hover {background:#636363; color:#dddddd;}
+.win {height:0; position:relative; overflow:hidden; background:#070707; transition:height 200ms cubic-bezier(.17,.05,.5,1.55);}
+.win > span {position:absolute; top:50%; margin-left:1em;}
+.board > .bgrid {display:grid; gap:1px; grid-template:repeat(5, 1fr)/repeat(5, 1fr);
+    grid-column:2/7; grid-row:2/7;
+    background:#636363; border:1px solid #636363;}
+.bgrid > .bcel {display:flex; background:#828282;}
+.celhi {outline:1px dashed #ddd;}
+.board > .blc {position:relative;}
+.board > .blr {position:relative;}
+.board > .blc span {position:absolute; bottom:20%; left:50%; font-size:xx-small; color:#313131;}
+.board > .blr span {position:absolute; right:25%; top:30%; font-size:xx-small; color:#313131;}
+.bgrid > .wk {background:#a4a4a4;}
+.bgrid > .bk {background:#5a5a5a;}
+.piece circle {cx:50%; cy:50%; r:25%;}
+.piece text {x:50%; y:50%; dominant-baseline:middle; text-anchor:middle; font-size:x-small;}
+#wp3 text {font-size:small;}
+#bp3 text {font-size:small;}
+.piece polygon {}
+.wp circle {fill:#dddddd;} .wp polygon {fill:#dddddd;} .wp text {fill:#464646;}
+.bp circle {fill:#101010;} .bp polygon {fill:#101010;} .bp text {fill:#f0f0f0;}
+.prog {position:absolute; width:3.6em; height:3.6em; background:inherit;
+    --pbgl:#d4d4d4; --pbgd:#2b2b2b; --pfgl:#333333; --pfgd:#ffffff;
+    --pbgli:rgba(43,43,43,0.85); --pbgdi:rgba(212,212,212,0.85);
+    box-shadow: inset 0.5px 0.5px 1px #323232;
+    outline:0.15em solid var(--pbg); border-radius:0.2em;
+    font-family:system-ui, sans-serif;
+    transition:left .3s .5s ease-in-out, top .3s .5s ease-out, transform .3s .5s;}
+.progr {transform:rotate(180deg);}
+.proghi {box-shadow: 0 0 0.9em var(--pfg);}
+.notr {transition:none !important;}
+.zover {z-index:20;}
+.prog span {position:absolute; left:-0.1rem; top:-0.1rem; width:3.7rem; text-align:center;
+    box-shadow: 0 0.5px 0.2px #323232;
+    font-size:xx-small; background:var(--pbg); color:var(--pfg);
+    border:0.1em solid var(--pbg); border-radius:0.2em;}
+.prog > .pgrid {display:grid; position:absolute; left:15%; top:24%; width:70%; height:70%;
+    gap:1px; grid-template:repeat(5, 1fr)/repeat(5, 1fr);
+    background:var(--pbg); border:1px solid var(--pbg);}
+.pgrid div {background:#828282;}
+.pgrid div.pgco {background:var(--pbg);}
+.pgrid div.pgx {background:var(--pbgi); box-shadow:0 0 1px var(--pbgi);}
+.pgw {--pbg:var(--pbgl); --pbgi:var(--pbgli); --pfg:var(--pfgl);}
+.pgb {--pbg:var(--pbgd); --pbgi:var(--pbgdi); --pfg:var(--pfgd);}
+.hide {display:none;}
+.rules .pview {background:#202020; overflow:scroll;}
+.rules pre {padding:0.5em; white-space:pre-wrap;}
+.rules code {font-weight:bolder;}
+#rb {width:20em; min-width:20em; height:26em; grid-template:repeat(26, 1fr) / repeat(20, 1fr); margin:1em;}
+#rb .pview {}
+</style>
+</head>
+<body>
+
+<div class="mpr">
+    The minigame from <a href="https://www.midnightprotocol.net/">Midnight Protocol</a>
+    (<a href="https://github.com/paiv/midnight-protocol">paiv</a>)
+</div>
+
+<div class="wmgr">
+<div class="pane rules hide" id="rb">
+    <div class="ptitle"><span>://Hacker_Chess: HOW_TO_PLAY</span><button class="ral" id="bhx">[x]</button></div>
+    <div class="pview">
+<pre>
+<strong>OBJECTIVE OF THE GAME</strong>
+Capture your opponent's king or put your own on the starting space of the enemy king.
+
+<strong>HOW TO PLAY</strong>
+Each player controls five pieces: four soldiers (circles) and one king (hexagonal). You play as black.
+
+During your turn, you move one of your pieces. Move onto a space occupied by an opponent piece to capture it. You cannot move onto a space occupied by one of your own pieces.
+
+There are five movement programs: harpoon, dagger, shuriken, jackhammer and onion. Each turn, two of those are available to you; two other ones to your opponent. After a player has used a program to move, it is switched out for the fifth program that sits by the side of the board.
+
+Each program offers a distinct movement pattern. The dark square on a program represents a piece's current space. Other squares represent all spaces you can reach from there.
+
+To move a piece, enter <code>[piece] [program] [space]</code>. For instance, to move piece 3 to B2 with the shuriken program, enter <code>3 shuriken B2</code>.
+
+<strong>OTHER COMMANDS</strong>
+Enter <code>reset</code> to reset the board. Add "easy", "medium", or "hard" to specify a difficulty level. For instance, enter <code>reset easy</code> to start a new game on easy.
+
+GL;HF
+</pre></div>
+</div>
+
+<div class="pane" id="gb">
+    <div class="ptitle"><span>://Hacker_Chess</span><button class="ral" id="bh">(?)</button></div>
+    <div class="pview">
+        <div class="board">
+            <div class="blc"></div>
+            <div class="blc"><span>0</span></div>
+            <div class="blc"><span>1</span></div>
+            <div class="blc"><span>2</span></div>
+            <div class="blc"><span>3</span></div>
+            <div class="blc"><span>4</span></div>
+            <div class="blr"><span>A</span></div>
+            <div class="bgrid"></div>
+            <div class="blr"><span>B</span></div>
+            <div class="blr"><span>C</span></div>
+            <div class="blr"><span>D</span></div>
+            <div class="blr"><span>E</span></div>
+        </div>
+        <div class="progs">
+        </div>
+        <div class="win"><span>YOU_WIN</span></div>
+    </div>
+    <div class="pinput">&gt;<input type="text" id="cin"/></div>
+</div>
+
+<div class="pane" id="ng">
+    <div class="ptitle"><span>New Game</span></div>
+    <div class="pview">
+        <button id="bpvc">Player vs AI</button>
+        <button id="bpvp">Player vs Player</button>
+        <button class="hide" id="bweb">Online Game</button>
+        <button id="bcvc">Demo</button>
+    </div>
+</div>
+
+</div>
+
+<script type="application/javascript">
+const svgns = 'http://www.w3.org/2000/svg'
+const UI = {}
+function addProg(name, id, mask, kls) {
+    const cc = (y,x) => y * 10 + x
+    let m = mask.reduce((m, p) => m.add(22 + p), new Set())
+    let el = document.createElement('div')
+    el.id = id
+    el.classList.add('prog')
+    el.classList.add(kls)
+    let t = document.createElement('span')
+    el.appendChild(t)
+    t.textContent = name
+    let g = document.createElement('span')
+    g.classList.add('pgrid')
+    el.appendChild(g)
+    for (let y = 0; y < 5; ++y) {
+        for (let x = 0; x < 5; ++x) {
+            let c = document.createElement('div')
+            g.appendChild(c)
+            if (y === 2 && x === 2) {
+                c.classList.add('pgco')
+            }
+            else if (m.has(cc(y,x))) {
+                c.classList.add('pgx')
+            }
+        }
+    }
+    return el
+}
+function makePieces() {
+    function addPiece(el, text, kls) {
+        let rect = el.getBoundingClientRect()
+        let canvas = document.createElementNS(svgns, 'svg')
+        canvas.id = kls + text
+        el.appendChild(canvas)
+        canvas.classList.add('piece')
+        canvas.classList.add(kls)
+        canvas.setAttribute('width', rect.width + 'px')
+        canvas.setAttribute('height', rect.height + 'px')
+        let t = document.createElementNS(svgns, 'text')
+        t.textContent = text
+        t.setAttribute('x', '50%')
+        t.setAttribute('y', '50%')
+        canvas.appendChild(t)
+        return canvas
+    }
+    function addPawn(el, text, kls) {
+        let canvas = addPiece(el, text, kls)
+        let s = document.createElementNS(svgns, 'circle')
+        canvas.insertBefore(s, canvas.firstChild)
+        return canvas
+    }
+    function addKing(el, text, kls) {
+        let canvas = addPiece(el, text, kls)
+        let rect = el.getBoundingClientRect()
+        let s = document.createElementNS(svgns, 'polygon')
+        let px = rect.width / 2
+        let py = rect.height / 2
+        let rx = rect.width * 0.35
+        let ry = rect.height * 0.35
+        const cx = (i) => Math.round((px + rx * Math.cos(i)) * 1000) / 1000
+        const cy = (i) => Math.round((py + ry * Math.sin(i)) * 1000) / 1000
+        let pts = [0,1,2,3,4,5].map(i => Math.PI * (1/2 + i/3)).map(i => [cx(i), cy(i)].join(',')).join(' ')
+        s.setAttribute('points', pts)
+        canvas.insertBefore(s, canvas.firstChild)
+        return canvas
+    }
+    let pieces = new Map()
+    for (let i of [0,1,3,4]) {
+        let pw = document.getElementById('a'+i)
+        pieces.set(21+i, addPawn(pw, i+1, 'wp'))
+        let pb = document.getElementById('e'+i)
+        pieces.set(11+i, addPawn(pb, i+1, 'bp'))
+    }
+    let pw = document.getElementById('a2')
+    pieces.set(23, addKing(pw, 3, 'wp'))
+    let pb = document.getElementById('e2')
+    pieces.set(13, addKing(pb, 3, 'bp'))
+    return pieces
+}
+const ProgPos = {
+    white: [[3, 8, 1], [3, 14, 1]],
+    black: [[19, 8], [19, 14]],
+    side: [11, 2],
+}
+ProgPos.all = [ProgPos.side, ...ProgPos.black, ...ProgPos.white]
+const Progs = [
+    ['dagger', 'dagg', [-10, -1, 1]],
+    ['harpoon', 'harp', [-20, 10]],
+    ['jackhammer', 'jack', [-11, -9, -1, 1]],
+    ['onion', 'onio', [-1, 1, 9, 11]],
+    ['shuriken', 'suri', [-11, -9, 9, 11]],
+]
+function makeProgs() {
+    let view = document.querySelector('#gb .progs')
+    const Init = [
+        [0, 'pgw', ProgPos.white[0]],
+        [4, 'pgw', ProgPos.white[1]],
+        [1, 'pgw', ProgPos.side],
+        [3, 'pgb', ProgPos.black[0]],
+        [2, 'pgb', ProgPos.black[1]],
+    ]
+    let progs = new Map()
+    for (const [pid, kls, pos] of Init) {
+        let el = addProg(...Progs[pid], kls)
+        view.appendChild(el)
+        el.style.top = pos[0] + 'em'
+        el.style.left = pos[1] + 'em'
+        progs.set(pid, el)
+        el.addEventListener('click', (e) => handleSelectedProg(pid, el, e))
+    }
+    return progs
+}
+function moveProg(pid, to, restyle=1, delay=1) {
+    const el = UI.progs.get(pid)
+    el.classList.add('zover')
+    if (delay) {
+        el.classList.remove('notr')
+    }
+    else {
+        el.classList.add('notr')
+    }
+    const [y,x,rot] = ProgPos.all[to]
+    el.style.top = y + 'em'
+    el.style.left = x + 'em'
+    if (rot) { el.classList.add('progr') }
+    else { el.classList.remove('progr') }
+    setTimeout(() => {el.classList.remove('zover')}, 800)
+    if (restyle) {
+        let kls = (to === 1 || to === 2) ? 'pgb' : 'pgw'
+        const kupdate = () => {
+            el.classList.remove('pgw')
+            el.classList.remove('pgb')
+            el.classList.add(kls)
+        }
+        setTimeout(kupdate, delay * 550)
+    }
+}
+function makeBoard() {
+    let bgrid = document.querySelector('#gb .bgrid')
+    let cells = new Map()
+    for (let y = 0; y < 5; ++y) {
+        for (let x = 0; x < 5; ++x) {
+            let pos = y*10 + x
+            let el = document.createElement('div')
+            bgrid.appendChild(el)
+            el.id = 'abcde'[y] + x
+            el.classList.add('bcel')
+            cells.set(pos, el)
+            el.addEventListener('click', (e) => handleSelectedCell(pos, el, e))
+        }
+    }
+    UI.board = cells
+    document.getElementById('a2').classList.add('wk')
+    document.getElementById('e2').classList.add('bk')
+    UI.pieces = makePieces()
+    UI.progs = makeProgs()
+}
+const Game = {}
+Game.isOnBoard = function (pos) {
+    let x = pos % 10
+    let y = (pos - x) / 10
+    return !(x < 0 || x > 4 || y < 0 || y > 4)
+}
+Game.isOwnPiece = function (piece, uid) {
+    let r = uid * 10
+    return (piece > r && piece < r + 10)
+}
+Game.isControlling = function (state, pos, uid) {
+    const {board} = state
+    let piece = board.get(pos)
+    return Game.isOwnPiece(piece, uid)
+}
+Game.isKing = function (piece) {
+    return (piece % 10) === 3
+}
+Game.ownedPieces = function* (state, uid) {
+    const {board} = state
+    for (let [pos,piece] of board) {
+        if (Game.isOwnPiece(piece, uid)) {
+            yield [pos, piece]
+        }
+    }
+}
+Game.isOwnProg = function (state, pid, uid) {
+    let i = state.progs.indexOf(pid)
+    return (i > 0 && uid === Math.ceil(i/2))
+}
+Game.isProgMove = function (move, uid) {
+    const [from, to, pid] = move
+    const [pname, ptag, pts] = Progs[pid]
+    let sig = 3 - 2 * uid
+    return pts.some(d => (to === from + d * sig))
+}
+Game.ownedProgs = function* (state, uid) {
+    const {progs} = state
+    for (let i = 1; i < 3; ++i) {
+        yield progs[(uid - 1) * 2 + i]
+    }
+}
+Game.validMoves = function* (state, uid, from) {
+    const {board} = state
+    function* allFrom(from) {
+        let sig = 3 - 2 * uid
+        for (let pid of Game.ownedProgs(state, uid)) {
+            const [pname, ptag, pts] = Progs[pid]
+            for (let d of pts) {
+                let to = from + d * sig
+                if (!Game.isOnBoard(to)) { continue }
+                let target = board.get(to)
+                if (Game.isOwnPiece(target, uid)) { continue }
+                yield [from, to, pid]
+            }
+        }
+    }
+    if (from !== undefined) {
+        yield* allFrom(from)
+    }
+    else {
+        for (let [pos,piece] of Game.ownedPieces(state, uid)) {
+            yield* allFrom(pos)
+        }
+    }
+}
+Game.isPassMove = function (move) {
+    const [from, to, pid] = move
+    return (from === to && to === 255)
+}
+Game.isTerminal = function (state) {
+    const {board} = state
+    let p13, p23, x13, x23
+    for (let [pos,piece] of board) {
+        if (piece === 13) {
+            p13 = true
+            if (pos === 2) { x13 = true }
+        }
+        if (piece === 23) {
+            p23 = true
+            if (pos === 42) { x23 = true }
+        }
+    }
+    return (!p13 || !p23 || x13 || x23)
+}
+Game.stateHash = function (state) {
+    const {board, progs, currentPlayer:uid} = state
+    let p1=[], p2=[], ks=[-1,-1]
+    for (let [pos,piece] of board) {
+        let one = Game.isOwnPiece(piece,1)
+        if (Game.isKing(piece)) {
+            ks[1-one] = pos
+        }
+        else {
+            (one ? p1 : p2).push(pos)
+        }
+    }
+    return [
+        uid,
+        ks[0], ...p1.sort(),
+        ks[1], ...p2.sort(),
+        progs[0],
+        ...progs.slice(1,3).sort(),
+        ...progs.slice(3,5).sort(),
+    ].join()
+}
+Game.nextState = function (state, move) {
+    if (state.ended) { return }
+    let {board, progs, currentPlayer:uid} = state
+    if (Game.isPassMove(move)) {
+        let nextPlayer = 3 - uid
+        let nextState = {board:board, progs, currentPlayer:nextPlayer, ended:true}
+        return nextState
+    }
+    let [from, to, pid] = move
+    let piece = board.get(from)
+    if (!piece) { return }
+    if (!Game.isOwnPiece(piece, uid)) { return }
+    if (!Game.isOnBoard(to)) { return }
+    let target = board.get(to)
+    if (Game.isOwnPiece(target, uid)) { return }
+    if (!Game.isOwnProg(state, pid, uid)) { return }
+    if (!Game.isProgMove(move, uid)) { return }
+    let nextPlayer = 3 - uid
+    let nextBoard = new Map(board)
+    nextBoard.delete(from)
+    nextBoard.set(to, piece)
+    let nextProgs = progs.slice()
+    let pi = progs.indexOf(pid)
+    nextProgs[pi] = progs[0]
+    nextProgs[0] = pid
+    let nextState = {board:nextBoard, progs:nextProgs, currentPlayer:nextPlayer}
+    if (Game.isTerminal(nextState)) {
+        nextState = {board:nextBoard, progs, currentPlayer:uid, ended:true}
+    }
+    return nextState
+}
+Game.score = function (state, uid) {
+    const {board, progs, currentPlayer} = state
+    if (state.ended) {
+        return 100 * (2*(uid === currentPlayer) - 1)
+    }
+    let score=0
+    for (let [pos,piece] of board) {
+        score += 10 * (2 * Game.isOwnPiece(piece, uid) - 1)
+    }
+    return score
+}
+Game.bestMove = function (state, valid) {
+    if (!valid) {
+        valid = [...Game.validMoves(state, state.currentPlayer)]
+    }
+    let bestMove, bestScore = -Infinity
+    for (let move of valid) {
+        let nextState = Game.nextState(state, move)
+        let score = Game.score(nextState, state.currentPlayer)
+        if (score > bestScore) {
+            bestScore = score
+            bestMove = move
+        }
+    }
+    return bestMove
+}
+function randomInt(min, max) {
+    min = Math.ceil(min)
+    max = Math.floor(max)
+    return Math.floor(Math.random() * (max - min) + min)
+}
+function shuffle(a) {
+    for (let i = a.length; i; ) {
+        let r = Math.floor(Math.random() * i)
+        i -= 1
+        let t = a[i]
+        a[i] = a[r]
+        a[r] = t
+    }
+    return a
+}
+function randomPlayer() {
+    let _uid = 0
+    let _state = undefined
+    async function init(state, uid, level) {
+        _uid = uid
+        _state = state;
+    }
+    async function update(state, move) {
+        _state = state;
+    }
+    async function getmove() {
+        let valid = [...Game.validMoves(_state, _state.currentPlayer)]
+        let move = valid[randomInt(0, valid.length)]
+        return Promise.resolve(move)
+    }
+    function discard() {}
+    return {init, update, getmove, discard}
+}
+function brutePlayer(depth=5) {
+    let discarded = false
+    async function inner(state) {
+        let uid = state.currentPlayer
+        let fringe = [[1, state]]
+        let seen = new Set()
+        let scores = new Map()
+        let hits = new Map()
+        let total = 0
+        while (fringe.length && !discarded) {
+            let [d, state, moved] = fringe.pop()
+            let k = Game.stateHash(state)
+            if (seen.has(k)) { continue }
+            seen.add(k)
+            total += 1
+            let valid = state.ended ? [] : [...Game.validMoves(state, state.currentPlayer)]
+            if (d >= depth || state.ended || !valid.length) {
+                let score = Game.score(state, uid) - d
+                if ((score > 0 && state.currentPlayer === uid) || (score < 0 && state.currentPlayer !== uid)) {
+                    let [from, to, pid] = moved
+                    let q = pid * 10000 + to * 100 + from
+                    scores.set(q, (scores.get(q) || 0) + score)
+                    hits.set(q, (hits.get(q) || 0) + 1)
+                }
+                continue
+            }
+            for (let m of valid) {
+                let ns = Game.nextState(state, m)
+                if (ns) {
+                    fringe.push([d+1, ns, moved || m])
+                }
+            }
+        }
+        let best, bestScore=-Infinity
+        for (let [q,s] of scores) {
+            s = s / hits.get(q)
+            if (s > bestScore) {
+                bestScore = s
+                let pid = Math.floor(q / 10000)
+                let to = Math.floor((q % 10000) / 100)
+                let from = (q % 100)
+                best = [from, to, pid]
+            }
+        }
+        return Promise.resolve(best)
+    }
+    let _uid = 0
+    let _state = undefined
+    async function init(state, uid, level) {
+        _uid = uid
+        _state = state;
+    }
+    async function update(state, move) {
+        _state = state;
+    }
+    async function getmove() {
+        return await inner(_state)
+    }
+    function discard() { discarded = true }
+    return {init, update, getmove, discard}
+}
+function remotePlayer(host) {
+    let requestController = undefined
+    function encodeState(state) {
+        let data = {}
+        let board = new Array()
+        for (let y = 0; y < 50; y += 10) {
+            for (let x = 0; x < 5; ++x) {
+                board.push(state.board.get(y+x) || 0)
+            }
+        }
+        data.board = board
+        data.progs = state.progs
+        data.currentPlayer = state.currentPlayer
+        return JSON.stringify(data)
+    }
+    async function inner(state) {
+        let data = encodeState(state)
+        let url = new URL('hackerchess/move', host)
+        let signal = undefined
+        if ('AbortController' in window) {
+            requestController = new AbortController()
+            signal = requestController.signal
+        }
+        return fetch(url, {
+            signal,
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            headers: {'Content-Type':'application/json'},
+            body: data,
+        })
+        .then((res) => res.json())
+    }
+    let _uid = 0, _level = undefined
+    let _state = undefined
+    async function init(state, uid, level) {
+        _uid = uid
+        _state = state
+        _level = level
+    }
+    async function update(state, move) {
+        _state = state
+    }
+    async function getmove() {
+        try {
+            return await inner(_state)
+        }
+        catch (e) {
+            console.log(e);
+        }
+    }
+    function discard() {
+        if (requestController) { requestController.abort() }
+    }
+    return {init, update, getmove, discard}
+}
+function binaryPlayer(memorySize=256) {
+    const wasmSource = 'arac.wasm'
+    async function instantiate() {
+        let imports = {env:{memory:_memory}, host:{
+            time_now:() => performance.now(),
+            random:() => Math.random(),
+            sqrlog:(x,y) => Math.sqrt(Math.log(x) / y),
+            trace_log:(x) => console.log(x)}}
+        if (_module !== undefined) {
+            _instance = await WebAssembly.instantiate(_module, imports)
+        }
+        else if ('instantiateStreaming' in WebAssembly) {
+            let res = await WebAssembly.instantiateStreaming(fetch(wasmSource), imports)
+            _module = res.module
+            _instance = res.instance
+        }
+        else {
+            _module = await fetch(wasmSource).then(res => res.arrayBuffer()).then(data => WebAssembly.compile(data))
+            _instance = await WebAssembly.instantiate(_module, imports)
+        }
+        encodeConfig()
+        _instance.exports.setup()
+    }
+    function encodeConfig() {
+        let memorySize = _memory.buffer.byteLength / 0x10000 // pages
+        let timeLimit = 2000 // ms
+        let difficultyLevel = _level || 0
+        let data = [memorySize, timeLimit, difficultyLevel]
+        let mem = new Uint32Array(_memory.buffer)
+        for (let [i,x] of data.entries()) {
+            mem[i] = x
+        }
+    }
+    function encodeState(state) {
+        let board = new Array()
+        for (let y = 0; y < 50; y += 10) {
+            for (let x = 0; x < 5; ++x) {
+                board.push(state.board.get(y+x) || 0)
+            }
+        }
+        let data = [state.currentPlayer, ...board, ...state.progs]
+        let mem = new Uint8Array(_memory.buffer)
+        for (let [i,x] of data.entries()) {
+            mem[i] = x
+        }
+    }
+    function decodeMove() {
+        let move = new Array()
+        let mem = new Uint8Array(_memory.buffer)
+        for (let i = 1; i < 4; ++i) {
+            move.push(mem[i])
+        }
+        return move
+    }
+    async function inner(state) {
+        encodeState(state)
+        let r = _instance.exports.select_move()
+        if (r) {
+            r = decodeMove()
+        }
+        return Promise.resolve(r)
+    }
+    let _uid = 0, _level = undefined
+    let _state = undefined
+    let _module=undefined, _brain=undefined
+    let _memory = new WebAssembly.Memory({initial:memorySize, maximum:memorySize}) // in pages
+    async function init(state, uid, level) {
+        _uid = uid
+        _state = state
+        _level = level
+        await instantiate()
+    }
+    async function update(state, move) {
+        _state = state
+    }
+    async function getmove() {
+        try {
+            return await inner(_state)
+        }
+        catch (e) {
+            console.log(e);
+        }
+    }
+    function discard() {
+    }
+    return {init, update, getmove, discard}
+}
+function workerPlayer() {
+    if (!('Worker' in window)) {
+        return binaryPlayer()
+    }
+    const workerSource = 'arac.js'
+    let _worker = undefined
+    let _resolves = new Map()
+    const onmessage = function (e) {
+        let [name, ...args] = e.data
+        let f = _resolves.get(name)
+        if (f) { f(...args) }
+    }
+    async function init(state, uid, level) {
+        _worker = new Worker(workerSource)
+        _worker.onmessage = onmessage
+        return new Promise(resolve => {
+            _resolves.set('init', resolve)
+            _worker.postMessage(['init', state, uid, level])
+        })
+    }
+    async function update(state, move) {
+        return new Promise(resolve => {
+            _resolves.set('update', resolve)
+            _worker.postMessage(['update', state, move])
+        })
+    }
+    async function getmove() {
+        return new Promise(resolve => {
+            _resolves.set('getmove', resolve)
+            _worker.postMessage(['getmove'])
+        })
+    }
+    function discard() {
+        if (_worker) { _worker.terminate(); _worker = undefined }
+    }
+    return {init, update, getmove, discard}
+}
+function showWin(message) {
+    let t = document.querySelector('#gb .win > span')
+    t.innerText = message
+    let el = document.querySelector('#gb .win')
+    el.style.height = '5em'
+}
+function hideWin(win) {
+    let el = document.querySelector('#gb .win')
+    el.style.height = '0'
+}
+class LocalPlayer {
+    constructor(uid) {
+        this.uid = uid
+        this.valid = []
+    }
+    update(state) {
+        this.state = state
+    }
+    input(resolve) {
+        this.valid = [...Game.validMoves(this.state, this.state.currentPlayer)]
+        if (!this.valid.length) {
+            return resolve()
+        }
+        this.resolve = resolve
+    }
+    didSelectProg(pid) {
+        if (!this.state || this.state.ended || !Game.isOwnProg(this.state, pid, this.uid)) { return }
+        if (this.moveProg === pid) {
+            this.moveProg = undefined
+        }
+        else {
+            this.moveProg = pid
+            let ok = false
+            for (let [from,to,pid] of this.valid) {
+                if ((this.moveFrom === undefined || this.moveFrom === from) && (this.moveTo === undefined || this.moveTo === to) && (this.moveProg === pid)) {
+                    ok = true; break
+                }
+            }
+            if (!ok) {
+                this.moveTo = undefined
+            }
+        }
+        this._commitSelection()
+    }
+    didSelectCell(pos) {
+        if (!this.state || this.state.ended || !this.valid) { return }
+        if (this.moveFrom === undefined) {
+            for (let [from,to,pid] of this.valid) {
+                if (pos === from) {
+                    this.moveFrom = pos
+                    break
+                }
+            }
+        }
+        else {
+            if (this.moveFrom === pos) {
+                this.moveFrom = undefined
+                this.moveTo = undefined
+            }
+            else {
+                for (let [from,to,pid] of this.valid) {
+                    if (pos === from) {
+                        this.moveFrom = pos
+                        this.moveTo = undefined
+                        break
+                    }
+                    else if ((this.moveProg === undefined || this.moveProg === pid) && this.moveFrom === from && pos === to) {
+                        this.moveTo = pos
+                        break
+                    }
+                }
+            }
+        }
+        this._commitSelection()
+    }
+    _commitSelection() {
+        let move;
+        if (this.moveFrom !== undefined && this.moveTo !== undefined && this.moveProg !== undefined) {
+            move = [this.moveFrom, this.moveTo, this.moveProg]
+            this.moveFrom = undefined
+            this.moveTo = undefined
+            this.moveProg = undefined
+        }
+        for (let [pos,el] of UI.board) {
+            if (pos === this.moveFrom || pos === this.moveTo) {
+                el.classList.add('celhi')
+            }
+            else {
+                el.classList.remove('celhi')
+            }
+        }
+        for (let [pid,el] of UI.progs) {
+            if (pid === this.moveProg) {
+                el.classList.add('proghi')
+            }
+            else {
+                el.classList.remove('proghi')
+            }
+        }
+        if (move) {
+            this.performCommand(move)
+        }
+    }
+    performCommand(move) {
+        let [from, to, pid] = move
+        if (!Game.isControlling(this.state, from, this.uid)) { return }
+        if (Game.isControlling(this.state, to, this.uid)) { return }
+        if (!Game.isOwnProg(this.state, pid, this.uid)) { return }
+        if (!Game.isProgMove(move, this.uid)) { return }
+        for (let [pos,el] of UI.board) {
+            el.classList.remove('celhi')
+        }
+        for (let [pid,el] of UI.progs) {
+            el.classList.remove('proghi')
+        }
+        if (this.resolve) {
+            this.resolve(move)
+        }
+    }
+}
+const PlayerController = new class {
+    init(...players) {
+        this._players = [...players]
+        this.observer = false
+    }
+    discard() {
+        this._players = []
+    }
+    showWin(uid) {
+        switch (this._players.length) {
+            case 0: return
+            case 1: {
+                let player = this._active_player()
+                showWin(player ? 'YOU_WIN' : 'YOU_LOSE');
+                return
+            }
+            case 2: {
+                uid = uid || this._active_player().uid
+                showWin(`PLAYER${uid}_WIN`);
+                return
+            }
+        }
+    }
+    didSelectCell(pos) {
+        if (this.observer) { return }
+        this._dispatch('didSelectCell', pos)
+    }
+    didSelectProg(pid) {
+        if (this.observer) { return }
+        this._dispatch('didSelectProg', pid)
+    }
+    didEnterCommand(text) {
+        let cmd = /^\s*(\S+)(?:\s+(\S+)(?:\s+(\S+))?)?\s*$/.exec(text.toLowerCase())
+        if (!cmd) { return }
+        let [s, sfrom, sprog, sto] = cmd
+        if (sfrom === 'reset') {
+            let level = ['easy', 'medium', 'hard'].indexOf(sprog)
+            if (level < 0) { level = undefined }
+            if (CurrentMatch) { CurrentMatch.reset(level) }
+            return
+        }
+        if (!sto) { return }
+        if (!this.state || this.state.ended || this.observer) { return }
+        const {board} = this.state
+        let from, to, pid
+        let y = 'abcde'.indexOf(sto[0])
+        to = y * 10 + parseInt(sto[1])
+        let pfrom = this.uid * 10 + parseInt(sfrom)
+        for (let [pos,piece] of board) {
+            if (piece === pfrom) {
+                from = pos; break
+            }
+        }
+        for (const [i,[name, id, mask]] of Progs.entries()) {
+            if (sprog === name) {
+                pid = i; break
+            }
+        }
+        this._dispatch('performCommand', [from, to, pid])
+    }
+    _active_player() {
+        if (!CurrentMatch) { return }
+        let uid = CurrentMatch.getCurrentPlayer()
+        for (let wrap of this._players) {
+            let player = wrap.getLocalPlayer()
+            if (player && player.uid === uid) {
+                return player
+            }
+        }
+    }
+    _dispatch(action, ...args) {
+        let player = this._active_player()
+        if (!player) { return }
+        let op = player[action]
+        player[action](...args)
+    }
+}
+function handleSelectedCell(pos, el, e) {
+    PlayerController.didSelectCell(pos)
+}
+function handleSelectedProg(pid, el, e) {
+    PlayerController.didSelectProg(pid)
+}
+function handleCommandInput(el, e) {
+    PlayerController.didEnterCommand(el.value)
+    el.value = ''
+}
+const TabComplete0 = ['reset']
+const TabCompleteProgs = Progs.map(p => p[0])
+const TabCompleteReset = ['easy', 'medium', 'hard']
+const findAll = function (rx, text) {
+    let res = new Array()
+    let xs;
+    while ((xs = rx.exec(text))) {
+        res.push(xs[0])
+    }
+    return res
+}
+function handleKeyboardInput(el, e) {
+    if (e.key === 'Tab' && !(e.altKey || e.ctrlKey || e.metaKey)) {
+        e.preventDefault()
+        let ps = findAll(/\S+/g, el.value.toLowerCase())
+        let iscomplete = /\s$/.test(el.value)
+        let tokens = []
+        let s = ''
+        if (!ps.length || (!iscomplete && ps.length === 1)) {
+            tokens = TabComplete0
+            if (!iscomplete) { s = ps[ps.length-1] || '' }
+        }
+        else if ((iscomplete && ps.length === 1) || (!iscomplete && ps.length === 2)) {
+            tokens = (ps[0] === 'reset') ? TabCompleteReset : TabCompleteProgs
+            if (!iscomplete) { s = ps[ps.length-1] || '' }
+        }
+        for (let token of tokens) {
+            if (token.startsWith(s)) {
+                if (!iscomplete) { ps.pop() }
+                ps.push(token)
+                el.value = ps.join(' ') + ' '
+                break
+            }
+        }
+    }
+}
+function localPlayer() {
+    let player
+    async function init(state, uid, level) {
+        player = new LocalPlayer(uid)
+        player.update(state)
+    }
+    async function update(state, move) {
+        player.update(state)
+    }
+    async function getmove() {
+        return await new Promise(resolve => player.input(resolve))
+    }
+    function discard() {}
+    function getLocalPlayer() { return player }
+    return {init, update, getmove, discard, getLocalPlayer}
+}
+function observerUI() {
+    let old_progs = undefined
+    async function init(state) {
+        const {board, progs, currentPlayer} = state
+        for (let [pos, piece] of board) {
+            let el = UI.pieces.get(piece)
+            let cell = UI.board.get(pos)
+            cell.appendChild(el)
+        }
+        for (let [i, prog] of progs.entries()) {
+            moveProg(prog, i, 1, 0)
+        }
+        old_progs = progs
+    }
+    async function update(state, move) {
+        if (!move || Game.isPassMove(move)) { return }
+        const {board, progs, currentPlayer} = state
+        const [from, to, pid] = move
+        clear(UI.board.get(from))
+        let cell = UI.board.get(to)
+        clear(cell)
+        let piece = board.get(to)
+        let el = UI.pieces.get(piece)
+        cell.appendChild(el)
+        moveProg(progs[0], 0, 0, 1)
+        let pi = old_progs.indexOf(pid)
+        moveProg(progs[pi], pi, 1, 1)
+        old_progs = progs
+        await sleep(500)
+    }
+    return {init, update}
+}
+let CurrentMatch = undefined
+let DifficultyLevel = 3
+function makeMatch(player1, player2, observer, level) {
+    const players = new Map([[1,player1], [2,player2]])
+    let currentPlayer, board, progs = [0, 1, 2, 3, 4]
+    let match = {}
+    match.difficultyLevel = level
+    function reset(level) {
+        currentPlayer = 1
+        board = makeBoard()
+        progs = shuffle(progs)
+        DifficultyLevel = level
+        match.difficultyLevel = level
+        match.ended = false
+        match.discarded = false
+    }
+    reset(level)
+    match.reset = function (level) {
+        hideWin()
+        reset(level)
+        match.start()
+    }
+    match.getCurrentPlayer = function () {
+        return currentPlayer
+    }
+    function getstate() {
+        return {board:new Map(board), progs:progs.slice(), currentPlayer, ended:match.ended}
+    }
+    function makeBoard() {
+        let board = new Map()
+        for (let x = 0; x < 5; ++x) {
+            board.set(x, 21 + x)
+        }
+        for (let x = 0; x < 5; ++x) {
+            board.set(40 + x, 11 + x)
+        }
+        return board
+    }
+    function update(move) {
+        let state = Game.nextState(getstate(), move)
+        if (state) {
+            ({board, progs, currentPlayer} = state)
+            match.ended = state.ended
+            return true
+        }
+    }
+    async function play(match) {
+        if (match.ended || match.discarded) { return }
+        let xplayer = players.get(currentPlayer)
+        let move = await xplayer.getmove()
+        if (match.discarded) { return }
+        if (!move) { match.ended=true; return }
+        if (!update(move)) {
+            console.error('err move', move);
+            move = undefined
+            currentPlayer = 3 - currentPlayer
+        }
+        await observer.update(getstate(), move)
+        if (match.discarded) { return }
+        for (let [uid, player] of players) {
+            await player.update(getstate(), move)
+            if (match.discarded) { return }
+        }
+        await sleep(500)
+        if (match.discarded) { return }
+        if (match.ended) {
+            PlayerController.showWin(currentPlayer)
+        }
+        else {
+            await play(match)
+        }
+    }
+    match.start = async function () {
+        await observer.init(getstate())
+        if (match.discarded) { return }
+        for (let [uid, player] of players) {
+            await player.init(getstate(), uid, match.difficultyLevel)
+            if (match.discarded) { return }
+        }
+        await sleep(1000)
+        play(match)
+    }
+    match.discard = function () {
+        match.discarded = true
+        player1.discard()
+        player2.discard()
+        PlayerController.discard()
+        hideWin()
+    }
+    return match
+}
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+function clear(el) {
+    while (el.firstChild) { el.removeChild(el.lastChild) }
+}
+function startNewGamePvC() {
+    if (CurrentMatch) { CurrentMatch.discard() }
+    let player1 = localPlayer()
+    let player2 = workerPlayer()
+    PlayerController.init(player1)
+    let match = makeMatch(player1, player2, observerUI(), 2)
+    CurrentMatch = match
+    match.start()
+}
+function startNewGameCvC() {
+    if (CurrentMatch) { CurrentMatch.discard() }
+    let player1 = workerPlayer()
+    let player2 = workerPlayer()
+    PlayerController.init(player1, player2)
+    PlayerController.observer = true
+    let match = makeMatch(player1, player2, observerUI(), 0)
+    CurrentMatch = match
+    match.start()
+}
+function startNewGamePvP() {
+    if (CurrentMatch) { CurrentMatch.discard() }
+    let player1 = localPlayer()
+    let player2 = localPlayer()
+    PlayerController.init(player1, player2)
+    let match = makeMatch(player1, player2, observerUI())
+    CurrentMatch = match
+    match.start()
+}
+function startNewGameOnline() {
+}
+function showRules() {
+    document.getElementById('rb').classList.remove('hide')
+}
+function hideRules() {
+    document.getElementById('rb').classList.add('hide')
+}
+function setupApp() {
+    makeBoard()
+    {
+        let el = document.getElementById('cin')
+        el.addEventListener('change', (e) => handleCommandInput(el, e))
+        el.addEventListener('keydown', (e) => handleKeyboardInput(el, e))
+    }
+    document.getElementById('bh').addEventListener('click', showRules)
+    document.getElementById('bhx').addEventListener('click', hideRules)
+    document.getElementById('bpvc').addEventListener('click', startNewGamePvC)
+    document.getElementById('bpvp').addEventListener('click', startNewGamePvP)
+    document.getElementById('bweb').addEventListener('click', startNewGameOnline)
+    document.getElementById('bcvc').addEventListener('click', startNewGameCvC)
+    startNewGamePvC()
+}
+window.addEventListener('DOMContentLoaded', setupApp)
+</script>
+<noscript>&lt;noscript&gt;</noscript>
+</body>
+</html>
