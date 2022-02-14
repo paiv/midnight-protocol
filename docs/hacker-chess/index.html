@@ -845,10 +845,10 @@ class LocalPlayer {
             }
         }
         if (move) {
-            this.performCommand(move)
+            this._performCommand(move)
         }
     }
-    performCommand(move) {
+    _performCommand(move) {
         let [from, to, pid] = move
         if (!Game.isControlling(this.state, from, this.uid)) { return }
         if (Game.isControlling(this.state, to, this.uid)) { return }
@@ -863,6 +863,28 @@ class LocalPlayer {
         if (this.resolve) {
             this.resolve(move)
         }
+    }
+    didEnterCommand(text) {
+        if (!this.state || this.state.ended) { return }
+        let cmd = /^\s*(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(text.toLowerCase())
+        if (!cmd) { return }
+        let [s, sfrom, sprog, sto] = cmd
+        const {board} = this.state
+        let from, to, pid
+        let y = 'abcde'.indexOf(sto[0])
+        to = y * 10 + parseInt(sto[1])
+        let pfrom = this.uid * 10 + parseInt(sfrom)
+        for (let [pos,piece] of board) {
+            if (piece === pfrom) {
+                from = pos; break
+            }
+        }
+        for (const [i,[name, id, mask]] of Progs.entries()) {
+            if (sprog === name) {
+                pid = i; break
+            }
+        }
+        this._performCommand([from, to, pid])
     }
 }
 const PlayerController = new class {
@@ -906,24 +928,7 @@ const PlayerController = new class {
             if (CurrentMatch) { CurrentMatch.reset(level) }
             return
         }
-        if (!sto) { return }
-        if (!this.state || this.state.ended || this.observer) { return }
-        const {board} = this.state
-        let from, to, pid
-        let y = 'abcde'.indexOf(sto[0])
-        to = y * 10 + parseInt(sto[1])
-        let pfrom = this.uid * 10 + parseInt(sfrom)
-        for (let [pos,piece] of board) {
-            if (piece === pfrom) {
-                from = pos; break
-            }
-        }
-        for (const [i,[name, id, mask]] of Progs.entries()) {
-            if (sprog === name) {
-                pid = i; break
-            }
-        }
-        this._dispatch('performCommand', [from, to, pid])
+        this._dispatch('didEnterCommand', text)
     }
     _active_player() {
         if (!CurrentMatch) { return }
